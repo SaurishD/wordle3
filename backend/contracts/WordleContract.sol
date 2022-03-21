@@ -50,18 +50,15 @@ contract WordleContract {
         return true;
     }
 
-    function checkWord(string calldata input)
-        external
-        payable
-        returns (string memory)
-    {
-        require(msg.value >= 1, "Send atleast one ether to play");
+    event CheckWord(address _sender, string _output);
+
+    function checkWord(string calldata input) external returns (string memory) {
         bytes memory temp = bytes(wordlist[word_of_the_day]);
         require(attempts[msg.sender][temp] < 6, "Your attempts are over");
         bool valid = false;
         bytes memory b1 = bytes(input);
 
-        for (uint256 i = 0; i < 6; i++) {
+        for (uint256 i = 0; i < validList.length; i++) {
             bytes memory b2 = bytes(validList[i]);
             if (equal(b1, b2)) {
                 valid = true;
@@ -94,9 +91,8 @@ contract WordleContract {
         }
         if (done) {
             attempts[msg.sender][temp] = 6;
-            bool sent = msg.sender.send(6);
-            require(sent, "Failed to send Ether");
         }
+        emit CheckWord(msg.sender, string(output));
         return string(output);
     }
 }
